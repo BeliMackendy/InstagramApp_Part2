@@ -19,8 +19,6 @@ public class LoginActivity extends AppCompatActivity {
 
     private EditText etUsername;
     private EditText etPassword;
-    private Button btLogin;
-    private TextView tvSignup;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,8 +27,8 @@ public class LoginActivity extends AppCompatActivity {
 
         etUsername = findViewById(R.id.etUsername);
         etPassword = findViewById(R.id.etPassword);
-        btLogin = findViewById(R.id.btLogin);
-        tvSignup = findViewById(R.id.tvSignup);
+        Button btLogin = findViewById(R.id.btLogin);
+        TextView tvSignup = findViewById(R.id.tvSignup);
 
         tvSignup.setOnClickListener(view -> {
             String username = etUsername.getText().toString().trim();
@@ -49,6 +47,34 @@ public class LoginActivity extends AppCompatActivity {
 
             SignupUser(username, password);
         });
+
+        btLogin.setOnClickListener(view -> {
+            String username = etUsername.getText().toString().trim();
+            String password = etPassword.getText().toString().trim();
+
+            if (username.isEmpty()) {
+                Toast.makeText(LoginActivity.this, "Username Required", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if (password.isEmpty()) {
+                Toast.makeText(LoginActivity.this, "Password Required", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            LoginUser(username, password);
+        });
+    }
+
+    private void LoginUser(String username, String password) {
+        ParseUser.logInInBackground(username, password, (user, e) -> {
+            if (user != null) {
+                // Hooray! The user is logged in.
+                Log.i(TAG, "Login Success: "+ParseUser.getCurrentUser().getUsername());
+            } else {
+                Log.e(TAG, "Login Failed: ",e );
+            }
+        });
     }
 
     private void SignupUser(String username, String password) {
@@ -59,9 +85,9 @@ public class LoginActivity extends AppCompatActivity {
 
         user.signUpInBackground(e -> {
             if (e == null) {
-                Log.i(TAG, "User Sign Up Successful: " + user.getUsername());
+                Log.i(TAG, "User Sign Up Successful: " + ParseUser.getCurrentUser().getUsername());
             } else {
-                Log.e(TAG, "Fail: ", e);
+                Log.e(TAG, "Sign up Failed: ", e);
             }
         });
     }
