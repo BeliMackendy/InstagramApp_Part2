@@ -2,6 +2,7 @@ package com.mypath.instagramapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 //import android.view.View;
@@ -71,6 +72,8 @@ public class LoginActivity extends AppCompatActivity {
             if (user != null) {
                 // Hooray! The user is logged in.
                 Log.i(TAG, "Login Success: "+ParseUser.getCurrentUser().getUsername());
+                Intent i = new Intent(LoginActivity.this,PostActivity.class);
+                startActivity(i);
             } else {
                 Log.e(TAG, "Login Failed: ",e );
             }
@@ -86,6 +89,8 @@ public class LoginActivity extends AppCompatActivity {
         user.signUpInBackground(e -> {
             if (e == null) {
                 Log.i(TAG, "User Sign Up Successful: " + ParseUser.getCurrentUser().getUsername());
+                Intent i = new Intent(LoginActivity.this,PostActivity.class);
+                startActivity(i);
             } else {
                 Log.e(TAG, "Sign up Failed: ", e);
             }
