@@ -19,8 +19,14 @@ import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
+
+//import com.parse.ParseException;
+import com.parse.ParseFile;
+import com.parse.ParseUser;
+//import com.parse.SaveCallback;
 
 import java.io.File;
 
@@ -28,7 +34,9 @@ public class PostActivity extends AppCompatActivity {
     public static final String TAG = "PostActivity";
 
     private Button btTakepicture;
+    private Button btPost;
     private ImageView ivPostimage;
+    private EditText etCapture;
     private File photoFile;
     public String photoFileName = "photo.jpg";
 
@@ -38,9 +46,50 @@ public class PostActivity extends AppCompatActivity {
         setContentView(R.layout.activity_post);
 
         btTakepicture = findViewById(R.id.btTakepicture);
+        btPost = findViewById(R.id.btPost);
+        etCapture = findViewById(R.id.etCapture);
         ivPostimage = findViewById(R.id.ivPostimage);
 
         btTakepicture.setOnClickListener(view -> onLaunchCamera());
+
+        btPost.setOnClickListener(view -> {
+            String description = etCapture.getText().toString().trim();
+
+            if(description.isEmpty()){
+                Toast.makeText(PostActivity.this, "Caption Cannot be empty", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            if(photoFile==null || ivPostimage.getDrawable()==null  ){
+                Toast.makeText(PostActivity.this, "There is no image", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            ParseUser user = ParseUser.getCurrentUser();
+            savePost(description,user,photoFile);
+        });
+    }
+
+    private void savePost(String description, ParseUser user, File photoFile) {
+        Post post = new Post();
+
+        post.setDescription(description);
+        post.setImage(new ParseFile(photoFile));
+        post.setUser(user);
+
+        post.saveInBackground(e -> {
+            if(e!=null){
+                Log.e(TAG, "Error while saving", e);
+                Toast.makeText(PostActivity.this, "Error while saving", Toast.LENGTH_SHORT).show();
+            }
+            Log.i(TAG, "Post save was successful!!! ");
+            etCapture.setText("");
+            ivPostimage.setImageResource(0);
+
+
+            btPost.setVisibility(View.INVISIBLE);
+            etCapture.setVisibility(View.INVISIBLE);
+            btTakepicture.setVisibility(View.VISIBLE);
+        });
     }
 
     @SuppressLint("QueryPermissionsNeeded")
@@ -62,7 +111,6 @@ public class PostActivity extends AppCompatActivity {
             // Start the image capture intent to take photo
 //            startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
             cameraResultLauncher.launch(intent);
-
         }
     }
 
@@ -80,6 +128,11 @@ public class PostActivity extends AppCompatActivity {
                         // Load the taken image into a preview
                         ImageView ivPreview = ivPostimage;
                         ivPreview.setImageBitmap(takenImage);
+                        
+                        etCapture.setText("");
+                        btPost.setVisibility(View.VISIBLE);
+                        etCapture.setVisibility(View.VISIBLE);
+                        btTakepicture.setVisibility(View.INVISIBLE);
                     } else { // Result was a failure
                         Toast.makeText(PostActivity.this, "Error taking picture", Toast.LENGTH_SHORT).show();
                     }

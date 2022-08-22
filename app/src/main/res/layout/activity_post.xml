@@ -30,7 +30,8 @@
         android:ems="10"
         android:hint="@string/caption"
         android:inputType="textPersonName"
-        android:minHeight="48dp" />
+        android:minHeight="48dp"
+        android:visibility="invisible" />
 
     <Button
         android:id="@+id/btTakepicture"
@@ -40,4 +41,14 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="10dp"
         android:text="@string/take_picture" />
+
+    <Button
+        android:id="@+id/btPost"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/etCapture"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        android:text="@string/post"
+        android:visibility="invisible" />
 </RelativeLayout>
