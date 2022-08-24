@@ -5,6 +5,7 @@ import androidx.activity.result.ActivityResultCallback;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.content.FileProvider;
 
 import android.annotation.SuppressLint;
@@ -20,7 +21,9 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 //import com.parse.ParseException;
@@ -29,6 +32,7 @@ import com.parse.ParseUser;
 //import com.parse.SaveCallback;
 
 import java.io.File;
+import java.util.Objects;
 
 public class PostActivity extends AppCompatActivity {
     public static final String TAG = "PostActivity";
@@ -40,33 +44,67 @@ public class PostActivity extends AppCompatActivity {
     private File photoFile;
     public String photoFileName = "photo.jpg";
 
+    public ImageButton ibUser;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_post);
+        ParseUser currentUser = ParseUser.getCurrentUser();
+        if (currentUser != null) {
+            // do stuff with the user
+            // Find the toolbar view inside the activity layout
+            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_menutop);
+            // Sets the Toolbar to act as the ActionBar for this Activity window.
+            // Make sure the toolbar exists in the activity and is not null
+            setSupportActionBar(toolbar);
 
-        btTakepicture = findViewById(R.id.btTakepicture);
-        btPost = findViewById(R.id.btPost);
-        etCapture = findViewById(R.id.etCapture);
-        ivPostimage = findViewById(R.id.ivPostimage);
+            Objects.requireNonNull(getSupportActionBar()).setTitle("");
 
-        btTakepicture.setOnClickListener(view -> onLaunchCamera());
+            btTakepicture = findViewById(R.id.btTakepicture);
+            btPost = findViewById(R.id.btPost);
+            etCapture = findViewById(R.id.etCapture);
+            ivPostimage = findViewById(R.id.ivPostimage);
 
-        btPost.setOnClickListener(view -> {
-            String description = etCapture.getText().toString().trim();
+            ibUser = findViewById(R.id.ibUser);
+            ImageButton ibHome = findViewById(R.id.ibHome);
 
-            if(description.isEmpty()){
-                Toast.makeText(PostActivity.this, "Caption Cannot be empty", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            ibUser.setOnClickListener(view -> {
+                Intent i = new Intent(PostActivity.this,LogoutActivity.class);
+                startActivity(i);
+//                finish();
+            });
 
-            if(photoFile==null || ivPostimage.getDrawable()==null  ){
-                Toast.makeText(PostActivity.this, "There is no image", Toast.LENGTH_SHORT).show();
-                return;
-            }
-            ParseUser user = ParseUser.getCurrentUser();
-            savePost(description,user,photoFile);
-        });
+            ibHome.setOnClickListener(view -> {
+                Intent i = new Intent(PostActivity.this,MainActivity.class);
+                startActivity(i);
+//                finish();
+            });
+
+            btTakepicture.setOnClickListener(view -> onLaunchCamera());
+
+            btPost.setOnClickListener(view -> {
+                String description = etCapture.getText().toString().trim();
+
+                if(description.isEmpty()){
+                    Toast.makeText(PostActivity.this, "Caption Cannot be empty", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
+                if(photoFile==null || ivPostimage.getDrawable()==null  ){
+                    Toast.makeText(PostActivity.this, "There is no image", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                ParseUser user = ParseUser.getCurrentUser();
+                savePost(description,user,photoFile);
+            });
+        } else {
+            // show the signup or login screen
+            Intent i = new Intent(PostActivity.this,LoginActivity.class);
+            startActivity(i);
+        }
+
+
     }
 
     private void savePost(String description, ParseUser user, File photoFile) {
@@ -75,6 +113,9 @@ public class PostActivity extends AppCompatActivity {
         post.setDescription(description);
         post.setImage(new ParseFile(photoFile));
         post.setUser(user);
+
+        ProgressBar pb = findViewById(R.id.pbLoading);
+        pb.setVisibility(ProgressBar.VISIBLE);
 
         post.saveInBackground(e -> {
             if(e!=null){
@@ -89,6 +130,9 @@ public class PostActivity extends AppCompatActivity {
             btPost.setVisibility(View.INVISIBLE);
             etCapture.setVisibility(View.INVISIBLE);
             btTakepicture.setVisibility(View.VISIBLE);
+
+            Toast.makeText(PostActivity.this, "Save", Toast.LENGTH_SHORT).show();
+            pb.setVisibility(ProgressBar.INVISIBLE);
         });
     }
 

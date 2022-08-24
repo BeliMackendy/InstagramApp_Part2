@@ -72,7 +72,7 @@ public class LoginActivity extends AppCompatActivity {
             if (user != null) {
                 // Hooray! The user is logged in.
                 Log.i(TAG, "Login Success: "+ParseUser.getCurrentUser().getUsername());
-                Intent i = new Intent(LoginActivity.this,PostActivity.class);
+                Intent i = new Intent(LoginActivity.this,MainActivity.class);
                 startActivity(i);
             } else {
                 Log.e(TAG, "Login Failed: ",e );
@@ -89,7 +89,7 @@ public class LoginActivity extends AppCompatActivity {
         user.signUpInBackground(e -> {
             if (e == null) {
                 Log.i(TAG, "User Sign Up Successful: " + ParseUser.getCurrentUser().getUsername());
-                Intent i = new Intent(LoginActivity.this,PostActivity.class);
+                Intent i = new Intent(LoginActivity.this,MainActivity.class);
                 startActivity(i);
             } else {
                 Log.e(TAG, "Sign up Failed: ", e);
