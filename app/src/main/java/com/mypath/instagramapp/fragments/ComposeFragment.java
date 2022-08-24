@@ -1,12 +1,4 @@
-package com.mypath.instagramapp;
-
-import androidx.activity.result.ActivityResult;
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.content.FileProvider;
+package com.mypath.instagramapp.fragments;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -15,27 +7,40 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.core.content.FileProvider;
+import androidx.fragment.app.Fragment;
+
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RelativeLayout;
 import android.widget.Toast;
 
-//import com.parse.ParseException;
+import com.mypath.instagramapp.Post;
+import com.mypath.instagramapp.R;
 import com.parse.ParseFile;
 import com.parse.ParseUser;
-//import com.parse.SaveCallback;
 
 import java.io.File;
-import java.util.Objects;
 
-public class PostActivity extends AppCompatActivity {
-    public static final String TAG = "PostActivity";
+public class ComposeFragment extends Fragment {
+
+    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
+    public static final String TAG = "ComposeFragment";
 
     private Button btTakepicture;
     private Button btPost;
@@ -43,69 +48,50 @@ public class PostActivity extends AppCompatActivity {
     private EditText etCapture;
     private File photoFile;
     public String photoFileName = "photo.jpg";
+    private ProgressBar pb;
+    private RelativeLayout rlTakepost;
 
-    public ImageButton ibUser;
+    public ComposeFragment() {
+        // Required empty public constructor
+    }
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_post);
-        ParseUser currentUser = ParseUser.getCurrentUser();
-        if (currentUser != null) {
-            // do stuff with the user
-            // Find the toolbar view inside the activity layout
-            Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar_menutop);
-            // Sets the Toolbar to act as the ActionBar for this Activity window.
-            // Make sure the toolbar exists in the activity and is not null
-            setSupportActionBar(toolbar);
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
+        return inflater.inflate(R.layout.fragment_compose, container, false);
+    }
 
-            Objects.requireNonNull(getSupportActionBar()).setTitle("");
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        btTakepicture = view.findViewById(R.id.btTakepicture);
+        btPost = view.findViewById(R.id.btPost);
+        etCapture = view.findViewById(R.id.etCapture);
+        ivPostimage = view.findViewById(R.id.ivPostimage);
+        rlTakepost = view.findViewById(R.id.rlTakepost);
+        pb = view.findViewById(R.id.pbLoading);
 
-            btTakepicture = findViewById(R.id.btTakepicture);
-            btPost = findViewById(R.id.btPost);
-            etCapture = findViewById(R.id.etCapture);
-            ivPostimage = findViewById(R.id.ivPostimage);
+        btTakepicture.setOnClickListener(view1 -> onLaunchCamera());
 
-            ibUser = findViewById(R.id.ibUser);
-            ImageButton ibHome = findViewById(R.id.ibHome);
+        btPost.setOnClickListener(view12 -> {
+            String description = etCapture.getText().toString().trim();
 
-            ibUser.setOnClickListener(view -> {
-                Intent i = new Intent(PostActivity.this,LogoutActivity.class);
-                startActivity(i);
-//                finish();
-            });
+            if(description.isEmpty()){
+                Toast.makeText(getContext(), "Caption Cannot be empty", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-            ibHome.setOnClickListener(view -> {
-                Intent i = new Intent(PostActivity.this,MainActivity.class);
-                startActivity(i);
-//                finish();
-            });
-
-            btTakepicture.setOnClickListener(view -> onLaunchCamera());
-
-            btPost.setOnClickListener(view -> {
-                String description = etCapture.getText().toString().trim();
-
-                if(description.isEmpty()){
-                    Toast.makeText(PostActivity.this, "Caption Cannot be empty", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                if(photoFile==null || ivPostimage.getDrawable()==null  ){
-                    Toast.makeText(PostActivity.this, "There is no image", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-                ParseUser user = ParseUser.getCurrentUser();
-                savePost(description,user,photoFile);
-            });
-        } else {
-            // show the signup or login screen
-            Intent i = new Intent(PostActivity.this,LoginActivity.class);
-            startActivity(i);
-        }
-
+            if(photoFile==null || ivPostimage.getDrawable()==null  ){
+                Toast.makeText(getContext(), "There is no image", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            ParseUser user = ParseUser.getCurrentUser();
+            savePost(description,user,photoFile);
+        });
 
     }
+
 
     private void savePost(String description, ParseUser user, File photoFile) {
         Post post = new Post();
@@ -114,13 +100,13 @@ public class PostActivity extends AppCompatActivity {
         post.setImage(new ParseFile(photoFile));
         post.setUser(user);
 
-        ProgressBar pb = findViewById(R.id.pbLoading);
+
         pb.setVisibility(ProgressBar.VISIBLE);
 
         post.saveInBackground(e -> {
             if(e!=null){
                 Log.e(TAG, "Error while saving", e);
-                Toast.makeText(PostActivity.this, "Error while saving", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "Error while saving", Toast.LENGTH_SHORT).show();
             }
             Log.i(TAG, "Post save was successful!!! ");
             etCapture.setText("");
@@ -128,10 +114,10 @@ public class PostActivity extends AppCompatActivity {
 
 
             btPost.setVisibility(View.INVISIBLE);
-            etCapture.setVisibility(View.INVISIBLE);
+            rlTakepost.setVisibility(View.INVISIBLE);
             btTakepicture.setVisibility(View.VISIBLE);
 
-            Toast.makeText(PostActivity.this, "Save", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getContext(), "Save", Toast.LENGTH_SHORT).show();
             pb.setVisibility(ProgressBar.INVISIBLE);
         });
     }
@@ -146,12 +132,12 @@ public class PostActivity extends AppCompatActivity {
         // wrap File object into a content provider
         // required for API >= 24
         // See https://guides.codepath.com/android/Sharing-Content-with-Intents#sharing-files-with-api-24-or-higher
-        Uri fileProvider = FileProvider.getUriForFile(PostActivity.this, "com.mypath.instagramapp", photoFile);
+        Uri fileProvider = FileProvider.getUriForFile(requireContext(), "com.mypath.instagramapp", photoFile);
         intent.putExtra(MediaStore.EXTRA_OUTPUT, fileProvider);
 
         // If you call startActivityForResult() using an intent that no app can handle, your app will crash.
         // So as long as the result is not null, it's safe to use the intent.
-        if (intent.resolveActivity(getPackageManager()) != null) {
+        if (intent.resolveActivity(requireContext().getPackageManager()) != null) {
             // Start the image capture intent to take photo
 //            startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
             cameraResultLauncher.launch(intent);
@@ -172,13 +158,13 @@ public class PostActivity extends AppCompatActivity {
                         // Load the taken image into a preview
                         ImageView ivPreview = ivPostimage;
                         ivPreview.setImageBitmap(takenImage);
-                        
+
                         etCapture.setText("");
                         btPost.setVisibility(View.VISIBLE);
-                        etCapture.setVisibility(View.VISIBLE);
+                        rlTakepost.setVisibility(View.VISIBLE);
                         btTakepicture.setVisibility(View.INVISIBLE);
                     } else { // Result was a failure
-                        Toast.makeText(PostActivity.this, "Error taking picture", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "Error taking picture", Toast.LENGTH_SHORT).show();
                     }
                 }
             });
@@ -188,7 +174,7 @@ public class PostActivity extends AppCompatActivity {
         // Get safe storage directory for photos
         // Use `getExternalFilesDir` on Context to access package-specific directories.
         // This way, we don't need to request external read/write runtime permissions.
-        File mediaStorageDir = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), TAG);
+        File mediaStorageDir = new File(requireContext().getExternalFilesDir(Environment.DIRECTORY_PICTURES), TAG);
 
         // Create the storage directory if it does not exist
         if (!mediaStorageDir.exists() && !mediaStorageDir.mkdirs()) {
