@@ -10,4 +10,7 @@
     <string name="take_picture">TAKE PICTURE</string>
     <string name="post">POST</string>
     <string name="logout">LOGOUT</string>
+    <string name="profile">Profile</string>
+    <string name="compose">Compose</string>
+    <string name="home">Home</string>
 </resources>
