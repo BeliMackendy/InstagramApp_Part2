@@ -1,5 +1,6 @@
 package com.mypath.instagramapp;
 
+import android.annotation.SuppressLint;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.LayoutInflater;
@@ -23,6 +24,20 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.ViewHolder> {
 
     public PostAdapter(List<Post> posts) {
         this.posts = posts;
+    }
+
+    // Clean all elements of the recycler
+    @SuppressLint("NotifyDataSetChanged")
+    public void clear() {
+        posts.clear();
+        notifyDataSetChanged();
+    }
+
+// Add a list of items -- change to type used
+    @SuppressLint("NotifyDataSetChanged")
+    public void addAll(List<Post> list) {
+        posts.addAll(list);
+        notifyDataSetChanged();
     }
 
     @NonNull
