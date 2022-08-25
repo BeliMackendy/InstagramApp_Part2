@@ -28,9 +28,9 @@ public class PostFragment extends Fragment {
 
     public static final String TAG = "PostFragment";
 
-    PostAdapter adapter;
+   protected PostAdapter adapter;
 
-    List<Post> allposts;
+   protected List<Post> allposts;
 
     public PostFragment() {
         // Required empty public constructor
@@ -62,9 +62,11 @@ public class PostFragment extends Fragment {
     }
 
     @SuppressLint("NotifyDataSetChanged")
-    private void queryPosts() {
+    protected void queryPosts() {
         ParseQuery<Post> query = ParseQuery.getQuery(Post.class);
         query.include(Post.KEY_USER);
+        query.setLimit(20);
+        query.addDescendingOrder(Post.KEY_CREATEDAT);
 
         query.findInBackground((posts, e) -> {
             if (e != null) {
